@@ -2,8 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const rootDir = require('./util/path');
+const ErrorController = require('./controllers/error');
 
-const adminData = require('./routes/admin');
+const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 // if (url === '/upload') {
 //   res.setHeader('Content-Type', 'text/html');
@@ -43,13 +44,9 @@ const { r, g, b, w, c, m, y, k } = [
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(rootDir, "public")));
 
-
-app.use('/admin', adminData.routes);
+app.use('/admin', adminRoutes);
 app.use('/', shopRoutes);
-
-app.use((req, res, next) => {
-  res.status(404).render('404', { pageTitle: 'Page Not found!', path: '/' });
-})
+app.use(ErrorController.pageNotFound);
 
 app.listen(port);
 console.log(`${g(`Express App listening on ${port}`)}`);
