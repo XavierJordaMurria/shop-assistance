@@ -4,10 +4,15 @@ const router = express.Router();
 
 router.get('/cart', ShopController.getCart);
 
+router.get('/orders', ShopController.getOrders);
+
+router.get('/', ShopController.getIndex);
+
 router.get('/products', ShopController.getProducts);
+
+router.get('/products/:productId', ShopController.getProductsById);
 
 router.get('/checkout', ShopController.getCheckout);
 
-router.get('/', ShopController.getIndex);
 
 module.exports = router;
