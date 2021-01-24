@@ -4,6 +4,8 @@ const router = express.Router();
 
 router.get('/cart', ShopController.getCart);
 
+router.post('/cart', ShopController.postCart);
+
 router.get('/orders', ShopController.getOrders);
 
 router.get('/', ShopController.getIndex);
