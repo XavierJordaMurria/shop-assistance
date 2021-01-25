@@ -28,7 +28,7 @@ module.exports = class Product {
 
   save() {
     getProductsFromFile(products => {
-      
+
       if (this.id) {
         const existingProductIndex = products.findIndex(p => p.id === this.id);
         const updatedProduts = [...products];
@@ -51,12 +51,26 @@ module.exports = class Product {
     });
   }
 
+  static delete(productId) {
+    getProductsFromFile(products => {
+
+      if (productId) {
+        const updatedProduts = products.filer(p => p.id !== productId);
+        fs.writeFile(p, JSON.stringify(updatedProduts), err => {
+          if (err) {
+            console.log(err);
+          }
+        });
+      }
+    });
+  }
+
   static fetchAll(cb) {
     getProductsFromFile(cb);
   }
 
   static findById(id, cb) {
-    getProductsFromFile( products => {
+    getProductsFromFile(products => {
       const theProduct = products.find(e => e.id === id);
       cb(theProduct);
     });
