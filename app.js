@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const rootDir = require('./util/path');
 const ErrorController = require('./controllers/error');
-const db = require('./util/database');
+const mongoose = require('mongoose');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -49,5 +49,10 @@ app.use('/admin', adminRoutes);
 app.use('/shop', shopRoutes);
 app.use(ErrorController.pageNotFound);
 
-app.listen(port);
-console.log(`${g(`Express App listening on ${port}`)}`);
+
+mongoose.connect('mongodb://root:password@localhost:27018/shop', { useNewUrlParser: true, useUnifiedTopology: true } )
+.then(()=> {
+  app.listen(port);
+  console.log(`${g(`Express App listening on ${port}`)}`);
+})
+.catch(e => console.error(e));

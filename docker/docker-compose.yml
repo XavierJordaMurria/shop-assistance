@@ -1,18 +1,18 @@
-version: '3.3'
+volumes:
+  shop-assistance-volume:
+
+version: '3'
 
 services:
-   db:
-     image: mysql:latest
-     volumes:
-       - db_data:/var/lib/mysql
-     restart: "no"
-     ports:
-      - "3306:3306"
-     environment:
-       MYSQL_ROOT_PASSWORD: somepass
-       MYSQL_DATABASE: db_name
-       MYSQL_USER: user
-       MYSQL_PASSWORD: pass
-
-volumes:
-    db_data: {}
+  mongo:
+    image: mongo:3.6
+    container_name: 'shop-assistance-mongo-container'
+    restart: 'no'
+    environment:
+     - MONGO_INITDB_DATABASE=shop-assistance
+     - MONGO_INITDB_ROOT_USERNAME=root
+     - MONGO_INITDB_ROOT_PASSWORD=root
+    ports:
+     - '27018:27017'   
+    volumes: 
+     - shop-assistance-volume:/data/db
