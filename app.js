@@ -5,6 +5,7 @@ const rootDir = require('./util/path');
 const ErrorController = require('./controllers/error');
 const mongoose = require('mongoose');
 const User = require('./models/user');
+const atlasCredentials = require('./mongo-atlas-credentials');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -45,8 +46,7 @@ app.use('/admin', adminRoutes);
 app.use('/shop', shopRoutes);
 app.use(ErrorController.pageNotFound);
 
-
-mongoose.connect('mongodb://root:password@localhost:27018/shop', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(`mongodb+srv://${atlasCredentials.userName}:${atlasCredentials.userPass}@${atlasCredentials.clusterName}.mongodb.net/${atlasCredentials.dbName}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     User.findOne()
       .then(user => {

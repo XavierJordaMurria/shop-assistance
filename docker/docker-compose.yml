@@ -1,18 +1,15 @@
+version: "3.1"
 volumes:
-  shop-assistance-volume:
-
-version: '3'
-
+  shop-assistance-volume1:
+    
 services:
-  mongo:
-    image: mongo:3.6
-    container_name: 'shop-assistance-mongo-container'
-    restart: 'no'
-    environment:
-     - MONGO_INITDB_DATABASE=shop-assistance
-     - MONGO_INITDB_ROOT_USERNAME=root
-     - MONGO_INITDB_ROOT_PASSWORD=root
+  mongodb:
+    image: mongo
+    container_name: shop-mongodb
+    restart: "no"
     ports:
-     - '27018:27017'   
-    volumes: 
-     - shop-assistance-volume:/data/db
+      - "27018:27017"
+    volumes:
+      - ./mongo-seed:/mongo-seed
+      - ./mongo-seed/mongo_import.sh:/docker-entrypoint-initdb.d/001-mongo_import.sh
+      - shop-assistance-volume1:/data/db

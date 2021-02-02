@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node app.js",
     "start:dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "databases": "docker-compose -f docker/docker-compose.yml --project-directory . up ",
+    "databases:volumes:down": "docker volume prune",
+    "databases:down": "docker-compose -f docker/docker-compose.yml --project-directory . down -v"
   },
   "author": "",
   "license": "ISC",
