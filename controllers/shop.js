@@ -1,5 +1,6 @@
 const Product = require('../models/product');
 const Order = require('../models/orders');
+const orders = require('../models/orders');
 
 
 exports.getProducts = (req, res, next) => {
@@ -73,11 +74,11 @@ exports.postCart = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-    Product.find({})
-        .then((products) => {
+    orders.find({'user.userId': req.user._id})
+        .then((orders) => {
             res.render('shop/orders', {
-                prods: products,
-                pageTitle: 'Orders',
+                orders: orders,
+                pageTitle: 'YourOrders',
                 path: '/shop/orders'
             });
         });
