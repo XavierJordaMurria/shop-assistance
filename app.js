@@ -9,6 +9,7 @@ const atlasCredentials = require('./mongo-atlas-credentials');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 const { nextTick } = require('process');
 
 const app = express();
@@ -44,6 +45,8 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminRoutes);
 app.use('/shop', shopRoutes);
+app.use(authRoutes);
+
 app.use(ErrorController.pageNotFound);
 
 mongoose.connect(`mongodb+srv://${atlasCredentials.userName}:${atlasCredentials.userPass}@${atlasCredentials.clusterName}.mongodb.net/${atlasCredentials.dbName}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true })
