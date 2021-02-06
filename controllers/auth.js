@@ -1,34 +1,88 @@
 const User = require('../models/user');
+const bcrypt = require('bcryptjs');
 
-exports.getLogIn = (req, res, next) => {
-    const isLoggedIn = req
-    .get('Cookie')
-    .split(';')[0]
-    .trim()
-    .split('=')[1];
-    console.log(`isLogged: ${isLoggedIn}`);
+exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
-        pageTitle: 'Login',
         path: '/login',
-        isAuthenticated: isLoggedIn
+        pageTitle: 'Login',
+        isAuthenticated: false
     });
 };
 
-exports.postLogIn = (req, res, next) => {
-      req.session.isLoggedIn = true;
-      req.session.save((err) => {
-          if (err) {
-              console.error(err);
-          }
-          res.redirect('/shop');
-      });
+exports.getSignup = (req, res, next) => {
+    res.render('auth/signup', {
+        path: '/signup',
+        pageTitle: 'Signup',
+        isAuthenticated: false
+    });
 };
 
-exports.postLogOut = (req, res, next) => {
-    req.session.destroy((err) => {
-        if(err) {
-            console.error(err);
-        }
-        res.redirect('/shop');
+exports.postLogin = (req, res, next) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    User.findOne({email})
+        .then(user => {
+            if (!user) {
+                return res.redirect('/login');
+            }
+            bcrypt
+            .compare(password, user.password)
+            .then((doMatch)=>{
+                if (doMatch) {
+                    req.session.isLoggedIn = true;
+                    req.session.user = user;
+                    return req.session.save(err => {
+                        console.log(err);
+                        res.redirect('/');;
+                    });
+                }
+
+                return res.redirect('/login');
+
+            })
+            .catch(e => {
+                console.error(e);
+                return res.redirect('/login');
+            });
+
+        })
+        .catch(err => console.log(err));
+};
+
+exports.postSignup = (req, res, next) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    const condifmPassword = req.body.condifmPassword;
+
+    User.findOne({ email })
+        .then((userDoc) => {
+            if (userDoc) {
+                return res.redirect("/signup");
+            }
+
+            return bcrypt.hash(password, 12)
+                .then(passHash => {
+                    const user = new User({
+                        email,
+                        password: passHash,
+                        cart: {
+                            items: []
+                        },
+                        name: email
+                    });
+
+                    return user.save();
+                })
+                .then((result) => {
+                    res.redirect("/login");
+                });
+        })
+        .catch(e => console.error(e));
+};
+
+exports.postLogout = (req, res, next) => {
+    req.session.destroy(err => {
+        console.log(err);
+        res.redirect('/');
     });
 };

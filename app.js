@@ -13,12 +13,14 @@ const MONGODB_URI = `mongodb+srv://${atlasCredentials.userName}:${atlasCredentia
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
+const csrf = require('csurf');
 
 const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: "sessions"
 });
+const csrfProtection = csrf();
 
 app.set('view engine', 'ejs');
 app.set("views", 'views');
@@ -41,6 +43,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, "public")));
 app.use(session({ secret: "my session secret", resave: false, saveUninitialized: false, store: store }));
 
+// csrfProtection need to goes always after initializing the session.
+app.use(csrfProtection);
+
 app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
@@ -54,26 +59,23 @@ app.use((req, res, next) => {
     .catch(e => console.error(e));
 });
 
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+/**
+ * ROUTES
+ */
 app.use('/admin', adminRoutes);
-app.use('/shop', shopRoutes);
 app.use(authRoutes);
+app.use(shopRoutes);
 
 app.use(ErrorController.pageNotFound);
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    User.findOne()
-      .then(user => {
-        if (user === undefined) {
-          const user = new User({
-            name: "Xavi",
-            email: "email@email.com",
-            items: []
-          });
-
-          user.save();
-        }
-      });
     app.listen(port);
     console.log(`${g(`Express App listening on ${port}`)}`);
   })

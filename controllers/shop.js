@@ -9,7 +9,7 @@ exports.getProducts = (req, res, next) => {
             res.render('shop/product-list', {
                 prods: products,
                 pageTitle: 'All Products',
-                path: '/shop/products',
+                path: '/products',
                 isAuthenticated: req.session.isLoggedIn
             });
         })
@@ -24,7 +24,7 @@ exports.getProductsById = (req, res, next) => {
             res.render('shop/product-detail', {
                 product: product,
                 pageTitle: `${product.title}`,
-                path: '/shop/products',
+                path: '/products',
                 isAuthenticated: req.session.isLoggedIn
             });
         });
@@ -37,8 +37,7 @@ exports.getIndex = (req, res, next) => {
             res.render('shop/index', {
                 prods: products,
                 pageTitle: 'Shop',
-                path: '/shop',
-                isAuthenticated: req.session.isLoggedIn
+                path: '/'
             });
         })
         .catch(e => console.error(e));
@@ -68,7 +67,7 @@ exports.postCart = (req, res, next) => {
             if (product) {
                 req.user.addToCart(prodId, product.price)
                     .then((response) => {
-                        res.redirect('/shop/cart')
+                        res.redirect('/cart')
                     })
                     .catch(e => {
                         console.error(e)
@@ -83,7 +82,7 @@ exports.getOrders = (req, res, next) => {
             res.render('shop/orders', {
                 orders: orders,
                 pageTitle: 'YourOrders',
-                path: '/shop/orders',
+                path: '/orders',
                 isAuthenticated: req.session.isLoggedIn
             });
         });
@@ -123,7 +122,7 @@ exports.getCheckout = (req, res, next) => {
             res.render('shop/checkout', {
                 prods: products,
                 pageTitle: 'Checkout',
-                path: '/shop/checkout',
+                path: '/checkout',
                 isAuthenticated: req.session.isLoggedIn
             });
         });
@@ -133,7 +132,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;
     req.user.removeFromCart(prodId)
         .then(response => {
-            res.redirect('/shop/cart');
+            res.redirect('/cart');
         })
         .catch(e => console.error(e));
 };
