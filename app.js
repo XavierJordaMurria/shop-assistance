@@ -6,13 +6,19 @@ const ErrorController = require('./controllers/error');
 const mongoose = require('mongoose');
 const User = require('./models/user');
 const atlasCredentials = require('./mongo-atlas-credentials');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const MONGODB_URI = `mongodb+srv://${atlasCredentials.userName}:${atlasCredentials.userPass}@${atlasCredentials.clusterName}.mongodb.net/${atlasCredentials.dbName}?retryWrites=true&w=majority`
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
-const { nextTick } = require('process');
 
 const app = express();
+const store = new MongoDBStore({
+  uri: MONGODB_URI,
+  collection: "sessions"
+});
 
 app.set('view engine', 'ejs');
 app.set("views", 'views');
@@ -33,9 +39,14 @@ const { r, g, b, w, c, m, y, k } = [
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, "public")));
+app.use(session({ secret: "my session secret", resave: false, saveUninitialized: false, store: store }));
 
 app.use((req, res, next) => {
-  User.findById("601149b3327fb898594afd07")
+  if (!req.session.user) {
+    return next();
+  }
+
+  User.findById(req.session.user._id)
     .then(user => {
       req.user = user;
       next();
@@ -49,7 +60,7 @@ app.use(authRoutes);
 
 app.use(ErrorController.pageNotFound);
 
-mongoose.connect(`mongodb+srv://${atlasCredentials.userName}:${atlasCredentials.userPass}@${atlasCredentials.clusterName}.mongodb.net/${atlasCredentials.dbName}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     User.findOne()
       .then(user => {

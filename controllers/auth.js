@@ -1,8 +1,6 @@
-const Product = require('../models/product');
-const Order = require('../models/orders');
-const orders = require('../models/orders');
+const User = require('../models/user');
 
-exports.getLogin = (req, res, next) => {
+exports.getLogIn = (req, res, next) => {
     const isLoggedIn = req
     .get('Cookie')
     .split(';')[0]
@@ -16,7 +14,21 @@ exports.getLogin = (req, res, next) => {
     });
 };
 
-exports.postLogin = (req, res, next) => {
-    res.setHeader('Set-Cookie', 'loggedIn=true')
-    res.redirect('/shop');
+exports.postLogIn = (req, res, next) => {
+      req.session.isLoggedIn = true;
+      req.session.save((err) => {
+          if (err) {
+              console.error(err);
+          }
+          res.redirect('/shop');
+      });
+};
+
+exports.postLogOut = (req, res, next) => {
+    req.session.destroy((err) => {
+        if(err) {
+            console.error(err);
+        }
+        res.redirect('/shop');
+    });
 };
