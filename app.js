@@ -14,6 +14,7 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 const csrf = require('csurf');
+const flash = require('connect-flash');
 
 const app = express();
 const store = new MongoDBStore({
@@ -45,6 +46,7 @@ app.use(session({ secret: "my session secret", resave: false, saveUninitialized:
 
 // csrfProtection need to goes always after initializing the session.
 app.use(csrfProtection);
+app.use(flash());
 
 app.use((req, res, next) => {
   if (!req.session.user) {

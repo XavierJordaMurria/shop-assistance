@@ -1,19 +1,44 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const nodeMailer = require('nodemailer');
+const sendgridTrans = require('nodemailer-sendgrid-transport');
+const sendGridCredentials = require('../sendgrid-credentials');
+
+const transporter = nodeMailer.createTransport(sendgridTrans({
+    auth: {
+        api_key: sendGridCredentials.apiKey
+    }
+}));
 
 exports.getLogin = (req, res, next) => {
+    let msg = req.flash('error');
+
+    if (msg.length >= 0) {
+        msg = msg[0];
+    }
+    else {
+        msg = null;
+    }
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
-        isAuthenticated: false
+        errorMessage: msg
     });
 };
 
 exports.getSignup = (req, res, next) => {
+    let msg = req.flash('error');
+
+    if (msg.length >= 0) {
+        msg = msg[0];
+    }
+    else {
+        msg = null;
+    }
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'Signup',
-        isAuthenticated: false
+        errorMessage: msg
     });
 };
 
@@ -23,6 +48,7 @@ exports.postLogin = (req, res, next) => {
     User.findOne({email})
         .then(user => {
             if (!user) {
+                req.flash('error', 'Invalid email or password.');
                 return res.redirect('/login');
             }
             bcrypt
@@ -37,11 +63,13 @@ exports.postLogin = (req, res, next) => {
                     });
                 }
 
+                req.flash('error', 'Invalid email or password.');
                 return res.redirect('/login');
 
             })
             .catch(e => {
                 console.error(e);
+                req.flash('error', `${e}`);
                 return res.redirect('/login');
             });
 
@@ -57,6 +85,7 @@ exports.postSignup = (req, res, next) => {
     User.findOne({ email })
         .then((userDoc) => {
             if (userDoc) {
+                req.flash('error', 'User email already exist, pick another one');
                 return res.redirect("/signup");
             }
 
@@ -75,7 +104,14 @@ exports.postSignup = (req, res, next) => {
                 })
                 .then((result) => {
                     res.redirect("/login");
-                });
+                    return transporter.sendMail({
+                        to: email,
+                        from: sendGridCredentials.senderEmail,
+                        subject: "Successfully signed In for the AppShop",
+                        html: "<h1>You successfully signed up!!</h1>"
+                    });
+                })
+                .catch(e => console.error(`Error sending email: ${e}`));
         })
         .catch(e => console.error(e));
 };
