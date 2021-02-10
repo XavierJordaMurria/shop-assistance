@@ -41,7 +41,9 @@ exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'Signup',
-        errorMessage: msg
+        errorMessage: msg,
+        oldInput: { email: "", password: "", condifmPassword: "" },
+        validationErrors: []
     });
 };
 
@@ -52,7 +54,7 @@ exports.postLogin = (req, res, next) => {
         .then(user => {
             if (!user) {
                 req.flash('error', 'Invalid email or password.');
-                return res.redirect('/login');
+                return res.status(422).redirect('/login');
             }
             bcrypt
                 .compare(password, user.password)
@@ -90,7 +92,9 @@ exports.postSignup = (req, res, next) => {
         return res.status(422).render('auth/signup', {
             path: '/signup',
             pageTitle: 'Signup',
-            errorMessage: errors.array()[0].msg
+            errorMessage: errors.array()[0].msg,
+            oldInput: { email: email, password: password, condifmPassword: req.body.confirmPassword },  
+            validationErrors: errors.array()
         });;
     }
     bcrypt.hash(password, 12)
