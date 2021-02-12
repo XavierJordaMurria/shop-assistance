@@ -8,13 +8,24 @@ router.get('/login', authController.getLogin);
 
 router.get('/signup', authController.getSignup);
 
-router.post('/login', authController.postLogin);
+router.post('/login',
+    [
+        body('email')
+            .isEmail()
+            .withMessage('Please enter a valid email')
+            .normalizeEmail(),
+        body('password',
+            'Please enter a valid password with lenth >= 6')
+            .trim()
+            .isLength({ min: 6 })],
+    authController.postLogin);
 
 router.post('/signup',
     [
         body('email')
             .isEmail()
             .withMessage('Please enter a valid email')
+            .normalizeEmail()
             .custom((value, { req }) => {
                 return User.findOne({ email: value })
                     .then((userDoc) => {
@@ -28,9 +39,11 @@ router.post('/signup',
             'password',
             'Please enter a valid password with lenth >= 6'
         )
+            .trim()
             .isLength({ min: 6 })
         ,
         body('confirmPassword')
+            .trim()
             .custom((value, { req }) => {
                 if (value !== req.body.password) {
                     throw new Error('Passwords must match');
