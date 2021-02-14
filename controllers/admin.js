@@ -1,5 +1,5 @@
 const Product = require('../models/product');
-const { validationResult } = require('express-validator/check');
+const { validationResult } = require('express-validator');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -7,7 +7,8 @@ exports.getAddProduct = (req, res, next) => {
     path: '/admin/add-product',
     editing: false,
     hasError: false,
-    errorMessage: null
+    errorMessage: null,
+    validationErrors: []
   });
 };
 
@@ -36,7 +37,8 @@ exports.postAddProduct = (req, res, next) => {
         price,
         description,
       },
-      errorMessage: error.array()[0].msg
+      errorMessage: error.array()[0].msg,
+      validationErrors: error.array()
     });
    }
 
@@ -52,7 +54,12 @@ exports.postAddProduct = (req, res, next) => {
       res.redirect('/admin/products');
 
     })
-    .catch(e => console.error(e));
+    .catch(e => {
+      console.error(e)
+      const error = new Error(e);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -72,9 +79,16 @@ exports.getEditProduct = (req, res, next) => {
         editing: editMode,
         product: product,
         hasError: false,
-        errorMessage: null
+        errorMessage: null,
+        validationErrors: []  
       });
-    });
+    })
+    .catch(e => {
+      console.error(e);
+      const error = new Error(e);
+      error.httpStatusCode = 500;
+      return next(error);
+    });;
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -89,17 +103,19 @@ exports.postEditProduct = (req, res, next) => {
 
   if (!error.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
-      pageTitle: 'Add Product',
+      pageTitle: 'Edit Product',
       path: '/admin/edit-product',
-      editing: false,
+      editing: true,
       hasError: true,
       product: {
-        title,
-        imageUrl,
-        price,
-        description,
+        imageUrl: updatedImageUrl,
+        price: updatedPrice,
+        description: updatedDesc,
+        title: updatedTitle,
+        _id: prodId,
       },
-      errorMessage: error.array()[0].msg
+      errorMessage: error.array()[0].msg,
+      validationErrors: error.array()
     });
    }
 
@@ -125,7 +141,12 @@ exports.postEditProduct = (req, res, next) => {
           console.log(`posting edit saved`)
           res.redirect('/admin/products');
         });
-    }).catch(e => console.error(e));
+    }).catch(e => {
+      console.error(e);
+      const error = new Error(e);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 
 };
 
@@ -147,5 +168,10 @@ exports.postDeleteProduct = (req, res, next) => {
     .then(res => {
       res.redirect('/admin/products');
     })
-    .catch(e => { console.error(e) });
+    .catch(e => { 
+      console.error(e);
+      const error = new Error(e);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
