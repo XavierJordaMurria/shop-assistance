@@ -49,6 +49,12 @@ app.use(csrfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
   }
@@ -63,15 +69,10 @@ app.use((req, res, next) => {
       next();
     })
     .catch(e => {
-      throw new Error(e)
+      next(new Error(e));
     });
 });
 
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
 
 /**
  * ROUTES
@@ -82,7 +83,13 @@ app.use(shopRoutes);
 app.use('/500', ErrorController.get500);
 
 app.use((error, req, res, next) => {
-  res.redirect('/ ');
+  res.status(500).render(
+    '500',
+    {
+        pageTitle: 'Error!',
+        path: '/500',
+        isAuthenticated: req.session.isLoggedIn
+    });
 });
 app.use(ErrorController.pageNotFound);
 
