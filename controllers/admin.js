@@ -18,12 +18,27 @@ exports.postAddProduct = (req, res, next) => {
     res.redirect('/login');
   }
 
-
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
   const error = validationResult(req);
+
+  if (!image) {
+    res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/edit-product',
+      editing: false,
+      hasError: true,
+      product: {
+        title,
+        price,
+        description,
+      },
+      errorMessage: 'Attached file it is not a valid image.',
+      validationErrors: []
+    });
+  }
 
   if (!error.isEmpty()) {
     res.status(422).render('admin/edit-product', {
@@ -33,15 +48,15 @@ exports.postAddProduct = (req, res, next) => {
       hasError: true,
       product: {
         title,
-        imageUrl,
         price,
         description,
       },
       errorMessage: error.array()[0].msg,
       validationErrors: error.array()
     });
-   }
+  }
 
+  const imageUrl = image.path;
   const product = new Product({
     title,
     imageUrl,
@@ -80,7 +95,7 @@ exports.getEditProduct = (req, res, next) => {
         product: product,
         hasError: false,
         errorMessage: null,
-        validationErrors: []  
+        validationErrors: []
       });
     })
     .catch(e => {
@@ -96,7 +111,7 @@ exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
+  const image = req.file;
   const updatedDesc = req.body.description;
 
   const error = validationResult(req);
@@ -108,7 +123,6 @@ exports.postEditProduct = (req, res, next) => {
       editing: true,
       hasError: true,
       product: {
-        imageUrl: updatedImageUrl,
         price: updatedPrice,
         description: updatedDesc,
         title: updatedTitle,
@@ -117,14 +131,9 @@ exports.postEditProduct = (req, res, next) => {
       errorMessage: error.array()[0].msg,
       validationErrors: error.array()
     });
-   }
+  }
 
-  const data = {
-    updatedTitle,
-    updatedImageUrl,
-    updatedDesc,
-    updatedPrice
-  };
+  const updatedImageUrl = image.path;
 
   Product.findById(prodId)
     .then(p => {
@@ -133,7 +142,9 @@ exports.postEditProduct = (req, res, next) => {
       }
       p.title = updatedTitle;
       p.price = updatedPrice;
-      p.imageUrl = updatedImageUrl;
+      if (image) {
+        p.imageUrl = image.path;
+      }
       p.description = updatedDesc;
 
       return p.save()
@@ -168,7 +179,7 @@ exports.postDeleteProduct = (req, res, next) => {
     .then(res => {
       res.redirect('/admin/products');
     })
-    .catch(e => { 
+    .catch(e => {
       console.error(e);
       const error = new Error(e);
       error.httpStatusCode = 500;
