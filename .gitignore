@@ -2,3 +2,4 @@
 node_modules
 mongo-atlas-credentials*
 sendgrid-credentials*
+data/*

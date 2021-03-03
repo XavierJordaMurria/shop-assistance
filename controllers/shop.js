@@ -1,3 +1,7 @@
+const fs = require('fs');
+const path = require('path');
+const rootDir = require('../util/path');
+
 const Product = require('../models/product');
 const Order = require('../models/orders');
 const orders = require('../models/orders');
@@ -156,4 +160,20 @@ exports.postCartDeleteProduct = (req, res, next) => {
             error.httpStatusCode = 500;
             return next(error);
           });;
+};
+
+exports.getInvoice = (req, res, next) => {
+    console.log('Preparing invoice');
+    const orderId = req.params.orderId;
+    const invoiceName = `invoice-${orderId}.pdf`;
+    const invoicePath = path.join('data', 'Invoices', invoiceName);
+    console.log(`${invoicePath}`);
+    fs.readFile(invoicePath, (error, data) =>{
+        if(error) {
+            return next(error);
+        }
+
+        res.send(data);
+    });
+
 };
