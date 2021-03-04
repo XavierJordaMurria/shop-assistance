@@ -5,6 +5,7 @@ const rootDir = require('../util/path');
 const Product = require('../models/product');
 const Order = require('../models/orders');
 const orders = require('../models/orders');
+const { set } = require('mongoose');
 
 
 exports.getProducts = (req, res, next) => {
@@ -165,15 +166,37 @@ exports.postCartDeleteProduct = (req, res, next) => {
 exports.getInvoice = (req, res, next) => {
     console.log('Preparing invoice');
     const orderId = req.params.orderId;
-    const invoiceName = `invoice-${orderId}.pdf`;
-    const invoicePath = path.join('data', 'Invoices', invoiceName);
-    console.log(`${invoicePath}`);
-    fs.readFile(invoicePath, (error, data) =>{
-        if(error) {
-            return next(error);
+
+    Order.findById(orderId)
+    .then((order)=>{
+        if (!order) {
+            return next(new Error('No order found!'));
         }
 
-        res.send(data);
-    });
+        if (order.user.userId.toString() !== req.user._id.toString()) {
+            return next(new Error('Unauthorised user!'));
+        }
+
+        const invoiceName = `invoice-${orderId}.pdf`;
+        const invoicePath = path.join('data', 'Invoices', invoiceName);
+        console.log(`${invoicePath}`);
+        // fs.readFile(invoicePath, (error, data) =>{
+        //     if(error) {
+        //         return next(error);
+        //     }
+    
+        //     res.setHeader('Content-Type', 'application/pdf');
+        //     res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
+        //     res.send(data);
+        // });
+
+        const file = fs.createReadStream(invoicePath);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
+        file.pipe(res);
+
+    })
+    .catch(e => next(e));
+
 
 };
