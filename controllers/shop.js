@@ -164,7 +164,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getInvoice = (req, res, next) => {
-    console.log('Preparing invoice');
+    
     const orderId = req.params.orderId;
 
     Order.findById(orderId)
@@ -185,8 +185,29 @@ exports.getInvoice = (req, res, next) => {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
         pdfDoc.pipe(res);
+        console.log('Preparing invoice for order:' + JSON.stringify(order));
+        pdfDoc.fontSize(26).text('Invoice', {
+            underline: true
+          });
+          pdfDoc.text('-----------------------');
+          let totalPrice = 0;
+          order.products.forEach(prod => {
+            totalPrice += prod.quantity * prod.productData.price;
+            pdfDoc
+              .fontSize(14)
+              .text(
+                prod.productData.title +
+                  ' - ' +
+                  prod.quantity +
+                  ' x ' +
+                  '$' +
+                  prod.productData.price
+              );
+          });
 
-        pdfDoc.text('Hello world');
+          pdfDoc.text('---');
+          pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
+
         pdfDoc.end();
 
     })
