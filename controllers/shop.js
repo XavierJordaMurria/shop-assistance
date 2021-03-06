@@ -6,6 +6,7 @@ const Product = require('../models/product');
 const Order = require('../models/orders');
 const orders = require('../models/orders');
 const { set } = require('mongoose');
+const ITEMS_PER_PAGE = 2;
 
 
 exports.getProducts = (req, res, next) => {
@@ -40,7 +41,10 @@ exports.getProductsById = (req, res, next) => {
 
 
 exports.getIndex = (req, res, next) => {
+    const page = req.query.page;
     Product.find({})
+        .skip((page -1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE)
         .then((products) => {
             res.render('shop/index', {
                 prods: products,
