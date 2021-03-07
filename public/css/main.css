@@ -240,10 +240,9 @@ form {
   background-color: rgb(199, 137, 112);
 }
 
-
 .pagination {
+  margin-top: 2rem;
   text-align: center;
-  padding-top: 2rem;
 }
 
 .pagination a {
@@ -254,8 +253,9 @@ form {
   margin: 0 1rem;
 }
 
-.pagination a:hover
-.pagination a:active {
+.pagination a:hover,
+.pagination a:active,
+.pagination a.active {
   background: #00695c;
   color: white;
 }
