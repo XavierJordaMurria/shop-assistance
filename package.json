@@ -30,7 +30,8 @@
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemon": "^2.0.7",
     "pdfkit": "^0.11.0",
-    "pug": "^3.0.0"
+    "pug": "^3.0.0",
+    "stripe": "^8.137.0"
   },
   "devDependencies": {
     "cookie-parser": "~1.4.4",
