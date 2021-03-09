@@ -23,13 +23,13 @@
                    <button id="order-btn" class="btn">ORDER</button>
                    <script src="https://js.stripe.com/v3"></script>
                    <script>
-                       var stripe = Stripe("pk_test_51IScpcJcqyv9mckxVvmbsHaoCI50ItCQWvd8AFufg8q8K419Y0UiXfI3zUFEF9VTq45bWA2wUobU2LtPYXzY1Obu00lScTeeoM")
+                       var stripe = Stripe("pk_live_51IScpcJcqyv9mckxu3hdykr4IIHToXlETqJrkwUCL9KyYWHs1T8fH39wYLXW9Df3NQ1Z0clG3Pu68UmvhSkn0ed500nB4R2IZv")
                        var orderBtn = document.getElementById('order-btn');
-                       orderBtn.addEventListener('click',   function() {
-                           stripe.redirectToCheckout({
-                               sessionId: ''
-                           });
-                       });
+                       orderBtn.addEventListener('click', function() {
+                        stripe.redirectToCheckout({
+                            sessionId: '<%= sessionId %>'
+                        });
+                    });
                    </script>
                 </div>
             </main>

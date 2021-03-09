@@ -12,13 +12,15 @@ router.get('/products/:productId', ShopController.getProductsById);
 
 router.get('/checkout', isAuth, ShopController.getCheckout);
 
+router.get('/checkout/success', isAuth, ShopController.getCheckoutSuccess);
+
+router.get('/checkout/cancel', isAuth, ShopController.getCheckout);
+
 router.get('/cart', isAuth, ShopController.getCart);
 
 router.post('/cart', isAuth, ShopController.postCart);
 
 router.post('/cart-delete-item', isAuth, ShopController.postCartDeleteProduct);
-
-router.post('/create-order', isAuth, ShopController.postOrders)
 
 router.get('/orders', isAuth, ShopController.getOrders);
 
